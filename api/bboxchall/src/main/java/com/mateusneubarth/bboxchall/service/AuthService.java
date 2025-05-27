@@ -1,11 +1,16 @@
 package com.mateusneubarth.bboxchall.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mateusneubarth.bboxchall.model.UserModel;
 import com.mateusneubarth.bboxchall.repository.UserRepository;
+import com.mateusneubarth.bboxchall.security.JwtTokenProvider;
+import com.mateusneubarth.bboxchall.security.UserPrincipal;
 
 @Service
 public class AuthService {
@@ -14,6 +19,12 @@ public class AuthService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
     
     public UserModel registerUser(String username, String email, String password) {
         if (userRepository.findByUsername(username).isPresent() || 
@@ -30,13 +41,16 @@ public class AuthService {
     }
     
     public UserModel authenticate(String username, String password) {
-        UserModel user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-            
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
+        // Autenticação via Spring Security
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(username, password)
+        );
         
-        return user;
+        // Obter o usuário autenticado
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        
+        // Retornar o UserModel (entidade JPA)
+        return userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

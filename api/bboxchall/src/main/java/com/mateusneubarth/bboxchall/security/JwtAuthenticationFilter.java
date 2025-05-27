@@ -23,6 +23,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
     
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+        //TODO Auto-generated constructor stub
+    }
+
     @Override
     @SuppressWarnings("UseSpecificCatch")
     protected void doFilterInternal(HttpServletRequest request,
