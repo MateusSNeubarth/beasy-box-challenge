@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mateusneubarth.bboxchall.dto.request.ChatMessageRequest;
 import com.mateusneubarth.bboxchall.model.ChatMessageModel;
 import com.mateusneubarth.bboxchall.model.UserModel;
+import com.mateusneubarth.bboxchall.service.ChatGptService;
 import com.mateusneubarth.bboxchall.service.ChatMessageService;
 
 
@@ -22,6 +23,12 @@ import com.mateusneubarth.bboxchall.service.ChatMessageService;
 public class ChatMessageController {
     @Autowired
     private ChatMessageService chatMessageService;
+
+    private final ChatGptService chatGptService;
+
+    public ChatMessageController(ChatGptService chatGptService) {
+        this.chatGptService = chatGptService;
+    }
     
     @PostMapping("/message")
     public ResponseEntity<ChatMessageModel> sendMessage(
@@ -34,9 +41,8 @@ public class ChatMessageController {
             user
         );
         
-        // Aqui você chamaria a API do ChatGPT e salvaria a resposta também
-        // String chatGptResponse = chatGptService.getResponse(request.getContent());
-        // chatMessageService.saveMessage(chatGptResponse, false, user);
+        String chatGptResponse = chatGptService.getResponse(request.getContent());
+        chatMessageService.saveMessage(chatGptResponse, false, user);
         
         return ResponseEntity.ok(message);
     }
