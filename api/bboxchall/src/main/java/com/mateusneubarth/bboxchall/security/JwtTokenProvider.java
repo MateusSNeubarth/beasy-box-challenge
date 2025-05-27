@@ -1,7 +1,6 @@
 package com.mateusneubarth.bboxchall.security;
 
 import java.util.Date;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -27,7 +26,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
         
         return Jwts.builder()
-                .setSubject(((UUID) userPrincipal.getId()).toString())
+                .setSubject((userPrincipal.getId()).toString())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)

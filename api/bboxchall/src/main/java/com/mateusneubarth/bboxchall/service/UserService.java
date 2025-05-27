@@ -2,7 +2,6 @@ package com.mateusneubarth.bboxchall.service;
 
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,7 +30,7 @@ public class UserService implements UserDetailsService {
         return UserPrincipal.create(user);
     }
     
-    public UserProfileResponse getUserProfile(UUID userId) {
+    public UserProfileResponse getUserProfile(Long userId) {
         Optional<UserModel> user = userRepository.findById(userId);
         if (user == null) {
             throw new ResourceNotFoundException("Usuário", "id", userId);
@@ -48,7 +47,7 @@ public class UserService implements UserDetailsService {
         return response;
     }
     
-    public void updateLastLogin(UUID userId) {
+    public void updateLastLogin(Long userId) {
         Optional<UserModel> user = userRepository.findById(userId);
         if (user == null) {
             throw new ResourceNotFoundException("Usuário", "id", userId);

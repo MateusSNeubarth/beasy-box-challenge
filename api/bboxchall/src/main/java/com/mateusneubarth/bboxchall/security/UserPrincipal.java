@@ -2,7 +2,6 @@ package com.mateusneubarth.bboxchall.security;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,12 +13,12 @@ import lombok.Getter;
 
 @Getter
 public class UserPrincipal implements UserDetails {
-    private final UUID id;
+    private final Long id;
     private final String username;
     private final String email;
     private final String password;
     
-    public UserPrincipal(UUID id, String username, String email, String password) {
+    public UserPrincipal(Long id, String username, String email, String password) {
         this.id = id;
         this.username = username;
         this.email = email;
