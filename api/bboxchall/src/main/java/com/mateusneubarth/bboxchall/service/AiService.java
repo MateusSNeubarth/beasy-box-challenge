@@ -4,15 +4,15 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChatGptService {
-
+public class AiService {
+    
     private final ChatClient chatClient;
 
-    public ChatGptService(ChatClient.Builder builder) {
-        chatClient = builder.build();
+    public AiService(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
     }
 
-    public String getResponse(String prompt) {
+    public String chat(String prompt) {
         return chatClient
                 .prompt(prompt)
                 .call()

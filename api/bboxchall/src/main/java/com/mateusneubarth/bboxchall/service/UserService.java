@@ -1,56 +1,38 @@
 package com.mateusneubarth.bboxchall.service;
 
-
-import java.util.Optional;
-
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import com.mateusneubarth.bboxchall.dto.response.UserProfileResponse;
-import com.mateusneubarth.bboxchall.exception.ResourceNotFoundException;
 import com.mateusneubarth.bboxchall.model.UserModel;
 import com.mateusneubarth.bboxchall.repository.UserRepository;
-import com.mateusneubarth.bboxchall.security.UserPrincipal;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
     private final UserRepository userRepository;
-    
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserModel user = userRepository.findByUsername(username)
-            .orElseThrow(() -> 
-                new UsernameNotFoundException("Usuário não encontrado: " + username));
-        
-        return UserPrincipal.create(user);
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
-    
-    public UserProfileResponse getUserProfile(Long userId) {
-        Optional<UserModel> user = userRepository.findById(userId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Usuário", "id", userId);
+
+    public UserModel register(String username, String email, String password) {
+        UserModel user = new UserModel();
+        String encryptedPassword = BCrypt
+            .hashpw(password, BCrypt.gensalt());
+        user.setPassword(encryptedPassword);
+        user.setUsername(username);
+        user.setEmail(email);
+        return userRepository.save(user);
+    }
+
+    public UserModel login(String email, String password) {
+        UserModel user = userRepository.findByUsername(email);
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+            return user;
         }
-        return mapToUserProfileResponse(user);
+        return null;
     }
-    
-    private UserProfileResponse mapToUserProfileResponse(Optional<UserModel> user) {
-        UserProfileResponse response = new UserProfileResponse();
-        UserModel userModel = user.orElseThrow(() -> new ResourceNotFoundException("Usuário", "id", null));
-        response.setId(userModel.getId());
-        response.setUsername(userModel.getUsername());
-        response.setEmail(userModel.getEmail());
-        return response;
-    }
-    
-    public void updateLastLogin(Long userId) {
-        Optional<UserModel> user = userRepository.findById(userId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Usuário", "id", userId);
-        }
+
+    public UserModel getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

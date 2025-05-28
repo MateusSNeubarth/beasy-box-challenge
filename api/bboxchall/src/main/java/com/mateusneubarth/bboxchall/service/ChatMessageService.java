@@ -12,20 +12,38 @@ import com.mateusneubarth.bboxchall.repository.ChatMessageRepository;
 
 @Service
 public class ChatMessageService {
+
     @Autowired
-    private ChatMessageRepository chatMessageRepository;
-    
-    public ChatMessageModel saveMessage(String content, boolean isUserMessage, UserModel user) {
-        ChatMessageModel message = new ChatMessageModel();
-        message.setContent(content);
-        message.setUserMessage(isUserMessage);
-        message.setTimestamp(LocalDateTime.now());
-        message.setUser(user);
-        
-        return chatMessageRepository.save(message);
+    ChatMessageRepository chatMessageRepository;
+
+    @Autowired
+    private AiService aiService;
+
+    private ChatMessageModel saveUserMessage(UserModel user, String message) {
+        return saveMessage(user, message, true);
     }
-    
-    public List<ChatMessageModel> getMessagesByUser(UserModel user) {
+
+    private ChatMessageModel saveAiResponse(UserModel user, String message) {
+        return saveMessage(user, message, false);
+    }
+
+    private ChatMessageModel saveMessage(UserModel user, String content, boolean isUserMessage) {
+        ChatMessageModel chatMessage = new ChatMessageModel();
+        chatMessage.setContent(content);
+        chatMessage.setUserMessage(isUserMessage);
+        chatMessage.setTimestamp(LocalDateTime.now());
+        chatMessage.setUser(user);
+        return chatMessageRepository.save(chatMessage);
+    }
+
+    public List<ChatMessageModel> getChatHistory(UserModel user) {
         return chatMessageRepository.findByUserOrderByTimestampAsc(user);
+    }
+
+    public String processMessage(UserModel user, String message) {
+        saveUserMessage(user, message);
+        String response = aiService.chat(message);
+        saveAiResponse(user, response);
+        return response;
     }
 }
